@@ -1,0 +1,6 @@
+- Figure out how to control the moc server
+- Generate music library database
+- Implement sequential-playing
+- Implement limit-view (like mutts limited views, only for seq/rnd-playing)
+- Implement random-playing
+- Implement playlists
