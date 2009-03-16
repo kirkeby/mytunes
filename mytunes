@@ -5,11 +5,13 @@ import sys
 import logging
 import socket
 import asyncore
+from threading import Thread
 
 from library import MusicLibrary
 from player import Player
 from moc import MocClient
 from moc import AsyncoreMocProtocol
+from console import run_console
 
 def main(library_path):
     library = MusicLibrary()
@@ -19,11 +21,22 @@ def main(library_path):
     protocol = AsyncoreMocProtocol()
     client = MocClient(protocol, player)
     protocol.client = client
+    player.client = client
 
     protocol.create_socket(socket.AF_UNIX, socket.SOCK_STREAM)
     protocol.connect('/home/sune/.moc/socket2')
 
-    asyncore.loop()
+    
+    try:
+        context = locals().copy()
+        del context['library_path']
+        context['running'] = True
+
+        Thread(target=run_console, name='Console', args=(context,)).start()
+        asyncore.loop()
+
+    finally:
+        context['running'] = False
 
 if __name__ == '__main__':
     logging.basicConfig(level=0)

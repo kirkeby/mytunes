@@ -14,10 +14,18 @@ class MusicLibrary(object):
         self.searcher = Searcher(self.ix)
         self.qparser = MultifieldParser(fieldnames=default_search_fiels)
 
-        self.songs = pickle.load(open(os.path.join(library_path, 'songs')))
+        songs_path = os.path.join(library_path, 'songs')
+        self.songs = self.all_songs = pickle.load(open(songs_path))
         self.sort()
 
     # view manipulation
+    def limit(self, q):
+        if q is None:
+            self.songs = self.all_songs
+        else:
+            self.songs = list(self.find(q))
+        self.sort()
+        
     def sort(self, fields=default_sort_fields):
         def key(song):
             return tuple(song.get(key) for key in fields)
@@ -37,5 +45,5 @@ class MusicLibrary(object):
 
     # by-index accessors
     def find(self, q):
-        for doc in self.searcher(self.qparser.parse(q)):
-            yield self._path_index[doc.path]
+        for doc in self.searcher.search(self.qparser.parse(q)):
+            yield self.songs[self._path_index[doc['path']]]

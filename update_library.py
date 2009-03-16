@@ -26,7 +26,7 @@ def song_walker(top):
                 continue
             kind = file.__class__
             
-            # FIXME - What to do, what to do? Multiple values per key...
+            # FIXME - What to do with multiple values per key?
             if kind in kind_keys:
                 song.update((k, unicode(file[n][0]))
                             for k, n in kind_keys[kind].items()
@@ -35,7 +35,8 @@ def song_walker(top):
                 song.update((k, unicode(file[k][0]))
                             for k in interesting_keys
                             if file.has_key(k))
-
+            if len(song) == 1:
+                print 'WARNING: ' + path
 
             yield song
 

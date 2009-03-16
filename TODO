@@ -1,7 +1,5 @@
-- Implement telnet/tty control
 - Implement random-playing
-- Implement limit-view (like mutts limited views, only for seq/rnd-playing)
+- Jabber bindings?
 - Implement playlists
 - In-place updating of library database
 - Automatic reload of library database
-- Jabber bindings?

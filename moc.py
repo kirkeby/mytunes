@@ -238,7 +238,7 @@ class MocClient(object):
             self.protocol.get_song_name(self.on_playing)
         elif transition == 'none->stop':
             # Connected to a stopped moc server, start it!
-            self.play_next_song()
+            self.player.play_next()
         elif transition == 'play->stop' and self.status <> 'Opening...':
             # This is magically fucked up. The moc-server is multi-threaded,
             # and wether we get play->play or play->stop->play state
@@ -248,14 +248,14 @@ class MocClient(object):
             # play->stop->play transition. So, this will work as expected in
             # most cases, but it is not fool-proof. Blame the morons who
             # "designed" the brain damage that is the moc protocol.
-            self.play_next_song()
+            self.player.play_next()
 
     def on_playing(self, path):
         log.debug('on_playing: ' + repr(path))
         if path:
             self.player.on_playing(path)
     def on_status_msg(self, msg):
-        log.debug('on_status_msg: %r', msg)
+        #log.debug('on_status_msg: %r', msg)
         self.status = msg
     def on_playlist_add(self, item):
         log.debug('on_playlist_add: %r', item)
@@ -266,6 +266,5 @@ class MocClient(object):
     def on_file_tags(self, path, tags):
         log.debug('on_file_tags: %r: %r', path, tags)
 
-    def play_next_song(self):
-        log.debug('playing next song')
-        self.protocol.play(self.player.next()['path'].encode('utf-8'))
+    def play(self, path):
+        self.protocol.play(path)
