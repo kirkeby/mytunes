@@ -6,7 +6,6 @@
 #     grep -F '#define' ../moc-2.5.0-alpha3/protocol.h | tr '\t' ' ' \
 #     | sed 's/#define *\([^ ]*\) *\(0x[^ ]*\).*/\1 = \2/' > _moc_protocol.py
 
-import socket
 import asyncore
 import struct
 import traceback
@@ -185,6 +184,7 @@ class AsyncoreMocProtocol(asyncore.dispatcher):
     def send_time(self, t):
         self.unsent += struct.pack(long_format, t)
     def send_string(self, s):
+        assert isinstance(s, str)
         self.send_int(len(s))
         self.unsent += s
     def send_item(self, item):
@@ -217,47 +217,6 @@ class AsyncoreMocProtocol(asyncore.dispatcher):
 
     def handle_error(self):
         log.error('Rome is burning!', exc_info=True)
-
-class MusicLibrary(object):
-    def __init__(self, songs):
-        self.songs = []
-        self._path_index = {}
-
-        for song in songs:
-            self.add(song)
-
-    def add(self, song):
-        self._path_index[song['path']] = len(self.songs)
-        self.songs.append(song)
-
-    # by-index accessors
-    def __len__(self):
-        return len(self.songs)
-    def get_at(self, index):
-        return self.songs[index]
-    def index(self, path):
-        return self._path_index[path]
-
-class Player(object):
-    def __init__(self, library):
-        self.library = library
-        self.playing = None
-
-    def on_playing(self, path):
-        try:
-            i = self.library.index(path)
-            self.playing = self.library.get_at(i)
-        except KeyError:
-            # FIXME - need a value to represent unknown?
-            log.info('playing unknown song: %r', path)
-            self.playing = None
-
-    def next(self):
-        if self.playing:
-            i = self.library.index(self.playing['path'])
-            return self.library.get_at((i + 1) % len(self.library))
-        else:
-            return self.library.get_at(0)
 
 class MocClient(object):
     def __init__(self, protocol, player):
@@ -309,33 +268,4 @@ class MocClient(object):
 
     def play_next_song(self):
         log.debug('playing next song')
-        self.protocol.play(self.player.next()['path'])
-
-playable_extensions = '.mp3', '.flac', '.aac', '.wav', '.ogg'
-
-if __name__ == '__main__':
-    logging.basicConfig(level=0)
-    logging.getLogger().setLevel(0)
-
-    import os
-    import sys
-    from commands import getoutput
-    song_dirs = sys.argv[1:]
-    songs = [ dict(path=os.path.join(song_dir, filename))
-              for song_dir in song_dirs
-              for filename in os.listdir(song_dir) 
-              if os.path.splitext(filename)[1] in playable_extensions ]
-    library = MusicLibrary(songs)
-    player = Player(library)
-
-    protocol = AsyncoreMocProtocol()
-    client = MocClient(protocol, player)
-    protocol.client = client
-
-    if not getoutput('pgrep mocp').strip():
-        os.system('mocp -S')
-
-    protocol.create_socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    protocol.connect('/home/sune/.moc/socket2')
-
-    asyncore.loop()
+        self.protocol.play(self.player.next()['path'].encode('utf-8'))

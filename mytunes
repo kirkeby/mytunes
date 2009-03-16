@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import logging
+import socket
+import asyncore
+
+from library import MusicLibrary
+from player import Player
+from moc import MocClient
+from moc import AsyncoreMocProtocol
+
+def main(library_path):
+    library = MusicLibrary()
+    library.open(library_path)
+    player = Player(library)
+
+    protocol = AsyncoreMocProtocol()
+    client = MocClient(protocol, player)
+    protocol.client = client
+
+    protocol.create_socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    protocol.connect('/home/sune/.moc/socket2')
+
+    asyncore.loop()
+
+if __name__ == '__main__':
+    logging.basicConfig(level=0)
+    logging.getLogger().setLevel(0)
+
+    from commands import getoutput
+    if not getoutput('pgrep mocp').strip():
+        os.system('mocp -S')
+
+    main(os.path.expanduser('~/.mytunes'))
