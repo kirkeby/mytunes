@@ -3,3 +3,5 @@
 - Implement limit-view (like mutts limited views, only for seq/rnd-playing)
 - Implement random-playing
 - Implement playlists
+- In-place updating of library database
+- Jabber bindings?

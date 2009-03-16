@@ -311,22 +311,29 @@ class MocClient(object):
         log.debug('playing next song')
         self.protocol.play(self.player.next()['path'])
 
+playable_extensions = '.mp3', '.flac', '.aac', '.wav', '.ogg'
+
 if __name__ == '__main__':
     logging.basicConfig(level=0)
     logging.getLogger().setLevel(0)
 
     import os
     import sys
+    from commands import getoutput
     song_dirs = sys.argv[1:]
     songs = [ dict(path=os.path.join(song_dir, filename))
               for song_dir in song_dirs
-              for filename in os.listdir(song_dir) ]
+              for filename in os.listdir(song_dir) 
+              if os.path.splitext(filename)[1] in playable_extensions ]
     library = MusicLibrary(songs)
     player = Player(library)
 
     protocol = AsyncoreMocProtocol()
     client = MocClient(protocol, player)
     protocol.client = client
+
+    if not getoutput('pgrep mocp').strip():
+        os.system('mocp -S')
 
     protocol.create_socket(socket.AF_UNIX, socket.SOCK_STREAM)
     protocol.connect('/home/sune/.moc/socket2')
