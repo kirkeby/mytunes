@@ -11,7 +11,7 @@ from library import MusicLibrary
 from player import Player
 from moc import MocClient
 from moc import AsyncoreMocProtocol
-from console import run_console
+from telnet import AsyncoreServer, TelnetProtocol
 
 def main(library_path):
     library = MusicLibrary()
@@ -26,17 +26,19 @@ def main(library_path):
     protocol.create_socket(socket.AF_UNIX, socket.SOCK_STREAM)
     protocol.connect('/home/sune/.moc/socket2')
 
+    def telnet_protocol_factory(sock, addr):
+        p = TelnetProtocol(sock)
+        p.player = player
+        p.library = library
+        return p
+        
+    telnetd = AsyncoreServer(telnet_protocol_factory)
+    telnetd.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+    telnetd.set_reuse_addr()
+    telnetd.bind(('127.0.0.1', 12345))
+    telnetd.listen(5)
     
-    try:
-        context = locals().copy()
-        del context['library_path']
-        context['running'] = True
-
-        Thread(target=run_console, name='Console', args=(context,)).start()
-        asyncore.loop()
-
-    finally:
-        context['running'] = False
+    asyncore.loop()
 
 if __name__ == '__main__':
     logging.basicConfig(level=0)

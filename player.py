@@ -1,3 +1,6 @@
+import logging
+log = logging.getLogger(__name__)
+
 class Player(object):
     def __init__(self, library):
         self.library = library

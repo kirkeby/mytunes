@@ -1,9 +1,12 @@
 import os
 import pickle
+import logging
 import whoosh.index
 from operator import itemgetter
 from whoosh.qparser import MultifieldParser
 from whoosh.searching import Searcher
+
+log = logging.getLogger(__name__)
 
 default_search_fiels = 'artist', 'album', 'title'
 default_sort_fields = 'artist', 'year', 'album', 'tracknumber'
@@ -46,4 +49,9 @@ class MusicLibrary(object):
     # by-index accessors
     def find(self, q):
         for doc in self.searcher.search(self.qparser.parse(q)):
-            yield self.songs[self._path_index[doc['path']]]
+            i = self._path_index.get(doc['path'])
+            if i is None:
+                log.info('found song in index, but not in library: %r',
+                         doc['path'])
+                continue
+            yield self.songs[i]
