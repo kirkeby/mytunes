@@ -54,7 +54,10 @@ class TelnetProtocol(asynchat.async_chat):
                 reply = matching[0](*pieces)
             except Exception, ex:
                 self.handle_error()
-                self.push('Error: %r\n' % ex)
+                reply = 'Error: %r' % ex
+        
+        if reply:
+            self.push(reply + '\n')
 
     def handle_error(self):
         log.error('Rome is burning!', exc_info=True)
@@ -77,9 +80,13 @@ class TelnetProtocol(asynchat.async_chat):
 
     def cmd_status(self, cmd):
         if self.player.playing:
-            self.push('Playing: %s\n' % self.player.playing)
-        else:
-            self.push('Not playing')
+            self.push('Current: %(title)s by %(artist)s\n'
+                      % self.player.playing)
+
+        states = ['[%s]' % self.player.client.state]
+        if self.player.random:
+            states.append('[random]')
+        self.push('State: ' + ' '.join(states) + '\n')
 
         self.push('%d/%d songs visible\n' % (len(self.library),
                                              len(self.library.all_songs)))
