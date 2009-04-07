@@ -1,3 +1,4 @@
+from random import randrange
 import logging
 log = logging.getLogger(__name__)
 
@@ -6,6 +7,7 @@ class Player(object):
         self.library = library
         self.client = None
         self.playing = None
+        self.random = True
 
     def on_playing(self, path):
         try:
@@ -17,16 +19,19 @@ class Player(object):
             self.playing = None
 
     def next(self):
-        if self.playing:
+        if self.random:
+            i = randrange(0, len(self.library))
+        elif self.playing:
             try:
                i = self.library.index(self.playing['path'])
             except KeyError:
                 # Someone may have removed the song from the library,
                 # or maybe this is a limited-view without this song.
+                # FIXME - should we use bisection to find the next song
+                # after the one we're missing?
                 i = -1
-            return self.library.get_at((i + 1) % len(self.library))
-        else:
-            return self.library.get_at(0)
+            i = (i + 1) % len(self.library)
+        return self.library.get_at(i)
 
     def play(self, song):
         self.client.play(song['path'].encode('utf-8'))
