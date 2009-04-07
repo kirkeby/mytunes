@@ -89,5 +89,8 @@ class TelnetProtocol(asynchat.async_chat):
         for i, song in enumerate(self.last_search):
             self.push('% 3d. %s\n' % (i, song))
 
-    def cmd_play(self, cmd, n):
+    def cmd_jump(self, cmd, n):
         self.player.play(self.last_search[int(n)])
+
+    def cmd_pause(self, cmd):
+        self.player.client.toggle_pause()

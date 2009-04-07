@@ -207,6 +207,11 @@ class AsyncoreMocProtocol(asyncore.dispatcher):
         self.send_int(CMD_PLAY)
         self.send_string('')
 
+    def pause(self):
+        self.send_int(CMD_PAUSE)
+    def unpause(self):
+        self.send_int(CMD_UNPAUSE)
+
     def get_option(self, name, callback):
         self.send_command(CMD_GET_OPTION, callback, ('int',))
         self.send_string(name)
@@ -221,7 +226,7 @@ class AsyncoreMocProtocol(asyncore.dispatcher):
 class MocClient(object):
     def __init__(self, protocol, player):
         self.protocol = protocol
-        self.state = 'STATE_NONE'
+        self.state = 'none'
         self.status = None
         self.player = player
 
@@ -231,7 +236,8 @@ class MocClient(object):
         self.protocol.set_option('AutoNext', 0)
 
     def on_state_changed(self, state):
-        transition = (self.state + '->' + state).replace('STATE_', '').lower()
+        state = state.replace('STATE_', '').lower()
+        transition = (self.state + '->' + state)
         log.debug('on_state_changed: ' + transition)
         self.state = state
         if transition == 'stop->play' or transition == 'none->play':
@@ -268,3 +274,9 @@ class MocClient(object):
 
     def play(self, path):
         self.protocol.play(path)
+
+    def toggle_pause(self):
+        if self.state == 'pause':
+            self.protocol.unpause()
+        else:
+            self.protocol.pause()
