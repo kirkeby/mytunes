@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Start daemon if it is not running already
+if ! pgrep -f 'python ./mytunes' > /dev/null
+then
+    cd `dirname $0`
+    python ./mytunes
+fi
+
+# Send command to mytunes daemon
+{
+    echo "$@"
+    echo quit
+} | nc localhost 12345

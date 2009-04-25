@@ -2,3 +2,8 @@ mytunes
 =======
 
 A moc-frontend with music librarian features.
+
+Requirements
+============
+
+daemon 1.0.1

@@ -6,6 +6,7 @@ import logging
 import socket
 import asyncore
 from threading import Thread
+from daemon import daemonize
 
 from library import MusicLibrary
 from player import Player
@@ -50,10 +51,11 @@ def main(library_path):
     telnetd.bind(('127.0.0.1', 12345))
     telnetd.listen(5)
     
+    daemonize()
     asyncore.loop()
 
 if __name__ == '__main__':
-    logging.basicConfig(level=0)
+    logging.basicConfig(level=0, filename='mytunes.log')
     logging.getLogger().setLevel(0)
 
     from commands import getoutput
