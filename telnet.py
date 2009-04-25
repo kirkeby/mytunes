@@ -39,7 +39,7 @@ class TelnetProtocol(asynchat.async_chat):
             return
 
         pieces = line.split(None, 1)
-        cmd = pieces[0]
+        cmd = pieces[0].replace('-', '_')
         
         matching = [handler for name, handler in self.commands
                             if name.startswith(cmd)]
@@ -107,3 +107,5 @@ class TelnetProtocol(asynchat.async_chat):
     def cmd_pause(self, cmd):
         if self.player.client.state == 'play':
             self.player.client.toggle_pause()
+    def cmd_toggle_pause(self, cmd):
+        self.player.client.toggle_pause()
