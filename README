@@ -63,6 +63,7 @@ next
     Skip to the next song.
 status
     Display status of the mytunes daemon.
+play
 pause
     Toggle play/pause state.
 

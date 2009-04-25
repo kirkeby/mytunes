@@ -96,5 +96,9 @@ class TelnetProtocol(asynchat.async_chat):
     def cmd_jump(self, cmd, n):
         self.player.play(self.last_search[int(n)])
 
+    def cmd_play(self, cmd):
+        if self.player.client.state == 'pause':
+            self.player.client.toggle_pause()
     def cmd_pause(self, cmd):
-        self.player.client.toggle_pause()
+        if self.player.client.state == 'play':
+            self.player.client.toggle_pause()
