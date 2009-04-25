@@ -1,9 +1,76 @@
-mytunes
+myTunes
 =======
 
-A moc-frontend with music librarian features.
+A "frontend" for moc (music on console), with music librarian features.
+
+myTunes is not a frontend in the way most people would expect, it runs as a
+daemon in the background controlling a moc-daemon, and accepts commands via
+a telnet interface and the mytunes-remote command.
+
+The myTunes music librarian features use mutagen and whoosh for indexing and
+searching in your music-collection, 
 
 Requirements
 ============
 
-daemon 1.0.1
+This is a frontend for moc (music on console), so you will need moc. It is
+known to work with moc from the Ubuntu 8.10 and 9.04.  For the mytunes-remote
+to work you'll need netcat.
+
+The following Python packages are needed:
+- daemon 1.0.1
+- Whoosh 0.1.9
+- mutagen 1.15
+
+The following Python packages are optional:
+- pynotify 0.1.1 (needed for Gnome popup notifications)
+
+Usage
+=====
+
+First you have to index your music-collection with the command:
+
+    python update_library.py
+
+This expects that your music collection is stored in ~/Music, and stores the
+index in ~/.mytunes. Now you can start the mytunes daemon, either directly
+with the command:
+
+    ./mytunes
+
+Now you can control the daemon with the remote, for example to limit the songs
+played to the Dr. Horrible sound-track issue the following command:
+
+    ./mytunes-remote limit dr horrible
+
+The daemon also listens on port 12345 on the loopback interface, so you can
+telnet to it and issue commands there.
+
+Commands
+========
+
+Commands are case sensitive and any unique prefix can be used as a short-hand.
+
+The following commands are available both via remote and telnet:
+
+limit
+    Limits the view mytunes will play songs from to those matching the
+    following criteria (a whoosh search string).
+Limit
+    Refines the view of a previous limit command (i.e. it applies the
+    following criteria as well as the previous ones).
+next
+    Skip to the next song.
+status
+    Display status of the mytunes daemon.
+pause
+    Toggle play/pause state.
+
+The following commands only make sense for the telnet interface:
+
+find
+    Searches in the current view.
+jump
+    Plays a song from the previous search.
+quit
+    Closes this telnet session.
