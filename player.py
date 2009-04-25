@@ -8,11 +8,14 @@ class Player(object):
         self.client = None
         self.playing = None
         self.random = True
+        self.listeners = []
 
     def on_playing(self, path):
         try:
             i = self.library.index(path)
             self.playing = self.library.get_at(i)
+            for l in self.listeners:
+                l('Playing', '%(title)s by %(artist)s' % self.playing)
         except KeyError:
             # FIXME - need a value to represent unknown?
             log.info('playing unknown song: %r', path)

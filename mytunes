@@ -13,10 +13,22 @@ from moc import MocClient
 from moc import AsyncoreMocProtocol
 from telnet import AsyncoreServer, TelnetProtocol
 
+try:
+    import pynotify
+    pynotify.init('myTunes')
+except ImportError:
+    pynotify = None
+
+def pynotify_callback(title, message):
+    n = pynotify.Notification(title, message)
+    n.show()
+
 def main(library_path):
     library = MusicLibrary()
     library.open(library_path)
     player = Player(library)
+    if pynotify:
+        player.listeners.append(pynotify_callback)
 
     protocol = AsyncoreMocProtocol()
     client = MocClient(protocol, player)
