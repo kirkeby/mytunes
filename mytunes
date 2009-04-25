@@ -57,9 +57,15 @@ def main(library_path):
 if __name__ == '__main__':
     logging.basicConfig(level=0, filename='mytunes.log')
     logging.getLogger().setLevel(0)
+    log = logging.getLogger('mytunes')
 
     from commands import getoutput
     if not getoutput('pgrep mocp').strip():
         os.system('mocp -S')
 
-    main(os.path.expanduser('~/.mytunes'))
+    try:
+        main(os.path.expanduser('~/.mytunes'))
+    except asyncore.ExitNow:
+        pass
+    except Exception:
+        log.fatal('Uncaught exception', exc_info=True)

@@ -71,6 +71,10 @@ class AsyncoreMocProtocol(asyncore.dispatcher):
     def writable(self):
         return bool(self.unsent)
 
+    def handle_close(self):
+        log.error('Lost connection to moc, bailing out')
+        raise asyncore.ExitNow()
+
     def handle_write(self):
         sent = self.send(self.unsent)
         self.unsent = self.unsent[sent:]
