@@ -28,8 +28,6 @@ class TelnetProtocol(asynchat.async_chat):
             if name.startswith(command_prefix)
         ]
 
-        self.push('myTunes/0.1 here\n')
-
     def collect_incoming_data(self, data):
         self.buffer.append(data)
 
@@ -64,7 +62,6 @@ class TelnetProtocol(asynchat.async_chat):
 
     def cmd_quit(self, cmd):
         self.close()
-        return 'Bye.'
 
     def cmd_next(self, cmd):
         self.player.play_next()
