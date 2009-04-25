@@ -7,6 +7,7 @@ import socket
 import asyncore
 from threading import Thread
 from daemon import daemonize
+import resource
 
 from library import MusicLibrary
 from player import Player
@@ -54,6 +55,18 @@ def main(library_path):
     daemonize()
     asyncore.loop()
 
+MAXFD = 1024
+def close_all():
+    maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
+    if maxfd == resource.RLIM_INFINITY:
+        maxfd = MAXFD
+
+    for fd in range(0, maxfd):
+        try:
+            os.close(fd)
+        except os.error:
+            pass
+
 if __name__ == '__main__':
     logging.basicConfig(level=0, filename='mytunes.log')
     logging.getLogger().setLevel(0)
@@ -64,8 +77,12 @@ if __name__ == '__main__':
         os.system('mocp -S')
 
     try:
-        main(os.path.expanduser('~/.mytunes'))
-    except asyncore.ExitNow:
-        pass
+        try:
+            main(os.path.expanduser('~/.mytunes'))
+        except asyncore.ExitNow, ex:
+            if ex.args and ex.args == ('restart',):
+                log.info('Restarting mytunes')
+                close_all()
+                os.execv(sys.executable, [sys.executable, __file__])
     except Exception:
         log.fatal('Uncaught exception', exc_info=True)

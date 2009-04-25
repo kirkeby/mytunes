@@ -50,6 +50,8 @@ class TelnetProtocol(asynchat.async_chat):
         else:
             try:
                 reply = matching[0](*pieces)
+            except asyncore.ExitNow:
+                raise
             except Exception, ex:
                 self.handle_error()
                 reply = 'Error: %r' % ex
@@ -60,6 +62,9 @@ class TelnetProtocol(asynchat.async_chat):
     def handle_error(self):
         log.error('Rome is burning!', exc_info=True)
 
+    def cmd_restart(self, cmd):
+        raise asyncore.ExitNow('restart')
+        
     def cmd_quit(self, cmd):
         self.close()
 
