@@ -3,6 +3,7 @@
 # Start daemon if it is not running already
 if ! pgrep -f 'python ./mytunes' > /dev/null
 then
+    test $1 = 'status' && exit 1
     cd `dirname $0`
     python ./mytunes
 fi
